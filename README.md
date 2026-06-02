@@ -1,11 +1,26 @@
-# core
+# dbpm-core
 
-core is an Oracle PL/SQL framework for database application deployment,
-versioning, dependency management, and lifecycle tracking.
+dbpm-core (Core) is an Oracle PL/SQL framework for database application
+deployment, versioning, dependency management, and lifecycle tracking.
 
 It provides infrastructure for building composable, semantically-versioned
 database applications with deployment provenance, metadata ownership,
 dependency tracking, and operational tooling.
+
+## Identity
+
+`dbpm-core` is the external project and repository identity for this
+runtime substrate. The in-database application identity remains `CORE` for
+backward compatibility with existing deployments, dbpm commands, deployment
+manifests, and registry metadata.
+
+Compatibility surfaces intentionally remain stable:
+- dbpm package name: `core`
+- Maven coordinates: `com.512itconsulting.database:core`
+- build metadata path: `META-INF/core-build.properties`
+- deployment commands: `bootstrap-core` and `check-core`
+- deployment manifests such as `deploy.sql`, `update.sql`, and
+  `uninstall.core.sql`
 
 ## Features
 
@@ -128,7 +143,7 @@ Example wrapper usage:
 ```sql
 @./env.sql
 
---example only - core should be installed first
+-- example only - dbpm-core (the CORE substrate) should be installed first
 @../core/Deployment_Manifests/deploy.core.full.sql &CORE
 @../utl_metadata_script/Deployment_Manifests/deploy.full.sql &UTL_METADATA_SCRIPT
 ```
@@ -139,13 +154,13 @@ produced the deployed database objects.
 
 ---
 
-## Uninstalling core
+## Uninstalling dbpm-core
 
 This repository includes:
 
 `Deployment_Manifests/uninstall.core.sql`
 
-a self-contained uninstall script for the `core` deployment.
+a self-contained uninstall script for the `CORE` deployment.
 
 - It drops the objects created by `deploy.core.full.sql`
 - It does not rely on `APP_OBJECTS` or `pkg_application` metadata being populated
@@ -172,7 +187,7 @@ applications.
 
 For example:
 - `MYAPP` inserts rows into `app_dictionary`
-- `app_dictionary` is owned by `core`
+- `app_dictionary` is owned by `CORE`
 
 Without ownership tracking, those rows become orphaned when `MYAPP`
 is later removed.
@@ -186,7 +201,7 @@ is later removed.
 
 Together, these identify the rows owned by the registering application.
 
-When `delete_application_p` is called, `core` loops through all
+When `delete_application_p` is called, Core loops through all
 registered metadata and executes:
 
 ```sql

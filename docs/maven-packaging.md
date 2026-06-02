@@ -1,12 +1,18 @@
 # Maven Packaging
 
-This repository is an Oracle PL/SQL/database tooling project, not a Java library.
-Maven is used here for versioning, dependency metadata, artifact distribution, and future dependency resolution between database repositories.
+dbpm-core (Core) is an Oracle PL/SQL/database tooling project, not a Java
+library. Maven is used here for versioning, dependency metadata, artifact
+distribution, and future dependency resolution between database repositories.
+
+`dbpm-core` is the external project identity. The Maven artifact coordinates
+remain `com.512itconsulting.database:core` for compatibility with existing dbpm
+artifact resolution and deployed Core instances. The in-database application
+identity also remains `CORE`.
 
 The initial distributable artifact is a ZIP archive of the repository contents:
 
 ```text
-target/core-0.1.0-SNAPSHOT.zip
+target/core-3.4.0.zip
 ```
 
 The ZIP includes source code, install/deployment scripts, documentation, manifests, examples, and tests if present. It excludes local build output, VCS metadata, GitHub workflow metadata, IDE files, and temporary files.
@@ -22,7 +28,7 @@ mvn package
 This runs the Maven Assembly Plugin and creates:
 
 ```text
-target/core-0.1.0-SNAPSHOT.zip
+target/core-3.4.0.zip
 ```
 
 The project uses `pom` packaging because Maven is serving as a metadata and distribution tool. There is no Java compile step.
@@ -54,14 +60,23 @@ This supports deployment traceability without embedding Git hashes into the Mave
 
 The `git.dirty` value is included as an additional traceability guard. A value of `true` means the artifact was built with uncommitted working-tree changes, so the commit hash alone does not fully describe the source content. Future release or deployment automation may choose to reject dirty builds.
 
-The plugin first writes Git metadata under `target/generated-git/`. The Maven Resources Plugin then uses that file as a filter and creates the final metadata file under `target/generated-build-metadata/`. The assembly descriptor places the resolved file at `META-INF/core-build.properties` inside the final ZIP. The template file under `assembly/` is excluded from the ZIP so the artifact contains resolved metadata rather than unresolved Maven placeholders.
+The plugin first writes Git metadata under `target/generated-git/`. The Maven
+Resources Plugin then uses that file as a filter and creates the final metadata
+file under `target/generated-build-metadata/`. The assembly descriptor places
+the resolved file at `META-INF/core-build.properties` inside the final ZIP. The
+template file under `assembly/` is excluded from the ZIP so the artifact
+contains resolved metadata rather than unresolved Maven placeholders.
+
+The `core-build.properties` name is intentionally unchanged. dbpm and related
+artifact consumers can rely on this path during the dbpm-core rebrand without
+needing a migration.
 
 ## Publishing To GitHub Packages
 
 The `pom.xml` publishes to GitHub Packages using this repository URL:
 
 ```text
-https://maven.pkg.github.com/rsantmyer/core
+https://maven.pkg.github.com/512itconsulting/core
 ```
 
 Publish with:
@@ -98,11 +113,13 @@ Use a GitHub personal access token with permission to publish packages for this 
 
 ## Assumptions
 
-- The package coordinates are intentionally lowercase and GitHub Packages compatible: `com.512itconsulting.database:core:0.1.0-SNAPSHOT`.
-- The GitHub Packages owner/repository path is `rsantmyer/core`, matching the canonical GitHub owner for this repository.
+- The package coordinates are intentionally lowercase and GitHub Packages compatible: `com.512itconsulting.database:core:3.4.0`.
+- The GitHub Packages owner/repository path is `512itconsulting/core`, matching the canonical GitHub owner and repository path.
 - The ZIP should preserve the repository's current layout instead of moving files into Maven's standard `src/main` tree.
 - The ZIP includes Maven packaging files themselves because it is currently a repository-content distribution.
 - `.claude/` is excluded as local tooling metadata, similar to IDE files.
+- The artifactId remains `core` during the dbpm-core rebrand so existing
+  package coordinates and dbpm artifact consumption continue to work.
 
 ## Multi-Repo Dependency Notes
 

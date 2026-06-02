@@ -5,11 +5,15 @@
 While each database application is independently deployable, real-world
 systems are typically composed of multiple cooperating applications.
 
+In these examples, dbpm-core is the external project/repository name for the
+Core runtime substrate. The in-database application identity remains `CORE`,
+and dbpm commands such as `bootstrap-core` and `check-core` continue to apply.
+
 For example:
 
 ```text
 Database/
-├── core/
+├── dbpm-core/
 ├── job_control/
 ├── utl_interval/
 ├── yaxform/
@@ -58,7 +62,7 @@ A typical multi-application deployment layout:
 
 ```text
 Database/
-├── core/
+├── dbpm-core/
 ├── job_control/
 ├── utl_interval/
 ├── yaxform/
@@ -81,7 +85,7 @@ Each application repository contains its own:
 For example:
 
 ```text
-core/
+dbpm-core/
 ├── Deployment_Manifests/
 ├── Packages/
 ├── Tables/
@@ -177,10 +181,10 @@ Example:
 @./env.sql
 
 PROMPT =========================================================
-PROMPT Deploying CORE
+PROMPT Deploying dbpm-core (CORE)
 PROMPT =========================================================
 
-@../core/Deployment_Manifests/deploy.core.full.sql &CORE
+@../dbpm-core/Deployment_Manifests/deploy.core.full.sql &CORE
 
 PROMPT =========================================================
 PROMPT Deploying JOB_CONTROL
@@ -304,7 +308,7 @@ Applications should generally be deployed in dependency order.
 Example:
 
 ```text
-core
+dbpm-core (CORE)
   └── job_control
         └── yaxform
               └── my_app
@@ -317,11 +321,11 @@ Future tooling may automate dependency resolution directly from
 
 ---
 
-## Why Not Store Orchestration in core?
+## Why Not Store Orchestration in dbpm-core?
 
-The orchestration layer is intentionally external to `core`.
+The orchestration layer is intentionally external to dbpm-core.
 
-`core` is:
+dbpm-core is:
 - a reusable database application framework
 
 The orchestration layer is:
