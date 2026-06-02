@@ -404,6 +404,12 @@ BEGIN
    l_minor := REGEXP_SUBSTR(ip_version,'^(\d+\.)?(\d+\.)?(\*|\d+)$',1,1,null,2);
    l_patch := REGEXP_SUBSTR(ip_version,'^(\d+\.)?(\d+\.)?(\*|\d+)$',1,1,null,3)
    ;
+   assert(l_major BETWEEN 0 AND 9999, 'major version component must be between 0 and 9999: '||l_major)
+   ;
+   assert(l_minor BETWEEN 0 AND 9999, 'minor version component must be between 0 and 9999: '||l_minor)
+   ;
+   assert(l_patch BETWEEN 0 AND 9999, 'patch version component must be between 0 and 9999: '||l_patch)
+   ;
    RETURN (l_major * 100000000) + (l_minor * 10000) + l_patch;
 END serialize_version_f;
 
