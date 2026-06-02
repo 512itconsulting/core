@@ -202,8 +202,9 @@ AS
                                     );
 
 /**
- * @description Raises an error when the requested version has already been deployed.
- * Use this to prevent accidental re-execution of non-idempotent deployment scripts.
+ * @description Raises an error when the requested version or a higher version has
+ * already been deployed. Use this to prevent accidental re-execution of
+ * non-idempotent deployment scripts.
  * @param ip_application_name Application whose deployed version should be checked.
  * @param ip_min_major_version Version being deployed - major component.
  * @param ip_min_minor_version Version being deployed - minor component.
@@ -230,7 +231,9 @@ AS
                                  deployment. This allows environments running the same semantic
                                  version to still be differentiated by source revision during
                                  active development, hotfixes, or unreleased builds.
- * @param ip_redeploy_okay TRUE allows re-running an already deployed version.
+ * @param ip_redeploy_okay Retained for backward compatibility. Exact-version
+ * redeploys are allowed for idempotent scripts; lower-version deployments are
+ * never allowed.
  */
    PROCEDURE begin_deployment_p( ip_application_name   IN application.application_name%TYPE
                                , ip_major_version      IN application.major_version%TYPE
@@ -298,7 +301,9 @@ AS
  * @param ip_artifact_checksum_alg Checksum algorithm, such as SHA-256.
  * @param ip_package_coordinate Resolved package coordinate from deployment tooling.
  * @param ip_build_metadata_json Free-form build metadata captured as JSON text.
- * @param ip_redeploy_okay TRUE allows re-running an already deployed version.
+ * @param ip_redeploy_okay Retained for backward compatibility. Exact-version
+ * redeploys are allowed for idempotent scripts; lower-version deployments are
+ * never allowed.
  * @param ip_notes Optional deployment notes.
  */
    PROCEDURE begin_artifact_deployment_p

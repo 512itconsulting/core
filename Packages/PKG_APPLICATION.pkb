@@ -445,20 +445,22 @@ PROCEDURE check_min_app_version_p( ip_application_name  IN application.applicati
                                  )
 IS
    rec_application application%ROWTYPE;
+   l_current_version INTEGER;
+   l_min_version     INTEGER;
 BEGIN
    SELECT *
      INTO rec_application
      FROM application
     WHERE application_name = UPPER(ip_application_name);
 
---   assert(rec_application.version >= NVL(ip_min_version,0), 'Application version is: '||rec_application.version||'. Minimum required version is: '||ip_min_version);
-   assert(rec_application.major_version >= NVL(ip_min_major_version,0), 'Application major_version is: '||rec_application.major_version||'. Minimum required major_version is: '||ip_min_major_version);
-   IF rec_application.major_version = ip_min_major_version THEN
-      assert(rec_application.minor_version >= NVL(ip_min_minor_version,0), 'Application minor_version is: '||rec_application.minor_version||'. Minimum required minor_version is: '||ip_min_minor_version);
-      IF rec_application.minor_version = ip_min_minor_version THEN
-         assert(rec_application.patch_version >= NVL(ip_min_patch_version,0), 'Application patch_version is: '||rec_application.patch_version||'. Minimum required patch_version is: '||ip_min_patch_version);
-     END IF;
-   END IF;
+   l_current_version := serialize_version_f(rec_application.major_version||'.'||rec_application.minor_version||'.'||rec_application.patch_version);
+   l_min_version := serialize_version_f(NVL(ip_min_major_version,0)||'.'||NVL(ip_min_minor_version,0)||'.'||NVL(ip_min_patch_version,0));
+
+   assert(l_current_version >= l_min_version
+        , 'Application version is: '
+          ||rec_application.major_version||'.'||rec_application.minor_version||'.'||rec_application.patch_version
+          ||'. Minimum required version is: '
+          ||NVL(ip_min_major_version,0)||'.'||NVL(ip_min_minor_version,0)||'.'||NVL(ip_min_patch_version,0));
 END check_min_app_version_p;
 
 
@@ -469,19 +471,22 @@ PROCEDURE check_already_deployed_p( ip_application_name  IN application.applicat
                                   , ip_min_patch_version IN application.patch_version%TYPE DEFAULT 0 )
 IS
    rec_application application%ROWTYPE;
+   l_current_version   INTEGER;
+   l_requested_version INTEGER;
 BEGIN
    SELECT *
      INTO rec_application
      FROM application
     WHERE application_name = UPPER(ip_application_name);
 
-   assert(rec_application.major_version <= NVL(ip_min_major_version,0), 'It appears major_version '||ip_min_major_version||' has already been deployed; application major_version is: '||rec_application.major_version);
-   IF rec_application.major_version = ip_min_major_version THEN
-      assert(rec_application.minor_version <= NVL(ip_min_minor_version,0), 'It appears minor_version '||ip_min_minor_version||' has already been deployed; application minor_version is: '||rec_application.minor_version);
-      IF rec_application.minor_version = ip_min_minor_version THEN
-         assert(rec_application.patch_version <  NVL(ip_min_minor_version,0), 'It appears patch_version '||ip_min_patch_version||' has already been deployed; application patch_version is: '||rec_application.patch_version);
-      END IF;
-   END IF;
+   l_current_version := serialize_version_f(rec_application.major_version||'.'||rec_application.minor_version||'.'||rec_application.patch_version);
+   l_requested_version := serialize_version_f(NVL(ip_min_major_version,0)||'.'||NVL(ip_min_minor_version,0)||'.'||NVL(ip_min_patch_version,0));
+
+   assert(l_current_version < l_requested_version
+        , 'It appears version '
+          ||NVL(ip_min_major_version,0)||'.'||NVL(ip_min_minor_version,0)||'.'||NVL(ip_min_patch_version,0)
+          ||' has already been deployed; application version is: '
+          ||rec_application.major_version||'.'||rec_application.minor_version||'.'||rec_application.patch_version);
 END check_already_deployed_p;
 
 
@@ -500,6 +505,8 @@ IS
    l_exists                BOOLEAN := FALSE;
    l_restart_failed_deploy BOOLEAN := FALSE;
    l_redeploy_curr_ver     BOOLEAN := FALSE;
+   l_current_version       INTEGER;
+   l_requested_version     INTEGER;
 BEGIN
    assert(ip_application_name = UPPER(ip_application_name));
    
@@ -546,6 +553,9 @@ BEGIN
       get_application_rec_p( ip_application_name => ip_application_name
                            , op_rec_application  => rec_application );
 
+      l_current_version := serialize_version_f(rec_application.major_version||'.'||rec_application.minor_version||'.'||rec_application.patch_version);
+      l_requested_version := serialize_version_f(ip_major_version||'.'||ip_minor_version||'.'||ip_patch_version);
+
       IF rec_application.deploy_status IN (c_deploy_status_running, c_deploy_status_fail) THEN
          assert(    ip_major_version = rec_application.major_version 
                 AND ip_minor_version = rec_application.minor_version 
@@ -558,6 +568,12 @@ BEGIN
         AND ip_patch_version = rec_application.patch_version 
       THEN
          l_redeploy_curr_ver := TRUE;
+      ELSE
+         assert(l_requested_version > l_current_version
+              , 'requested deployment version '
+                ||ip_major_version||'.'||ip_minor_version||'.'||ip_patch_version
+                ||' cannot be lower than deployed version '
+                ||rec_application.major_version||'.'||rec_application.minor_version||'.'||rec_application.patch_version);
       END IF;
 
       CASE WHEN l_redeploy_curr_ver = TRUE
