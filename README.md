@@ -16,7 +16,7 @@ manifests, and registry metadata.
 
 Compatibility surfaces intentionally remain stable:
 - dbpm package name: `core`
-- Maven coordinates: `com.512itconsulting.database:core`
+- package coordinates: `com.512itconsulting.database:core`
 - build metadata path: `META-INF/core-build.properties`
 - deployment commands: `bootstrap-core` and `check-core`
 - deployment manifests such as `deploy.sql`, `update.sql`, and

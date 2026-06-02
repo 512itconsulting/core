@@ -15,3 +15,7 @@ dependencies: []
 scripts:
   install: Deployment_Manifests/deploy.sql
   upgrade: Deployment_Manifests/update.sql
+
+publish:
+  group: com.512itconsulting.database
+  artifact_id: core
