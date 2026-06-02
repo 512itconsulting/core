@@ -12,7 +12,7 @@ identity also remains `CORE`.
 The initial distributable artifact is a ZIP archive of the repository contents:
 
 ```text
-target/core-3.4.0.zip
+target/core-3.4.1.zip
 ```
 
 The ZIP includes source code, install/deployment scripts, documentation, manifests, examples, and tests if present. It excludes local build output, VCS metadata, GitHub workflow metadata, IDE files, and temporary files.
@@ -28,7 +28,7 @@ mvn package
 This runs the Maven Assembly Plugin and creates:
 
 ```text
-target/core-3.4.0.zip
+target/core-3.4.1.zip
 ```
 
 The project uses `pom` packaging because Maven is serving as a metadata and distribution tool. There is no Java compile step.
@@ -113,7 +113,7 @@ Use a GitHub personal access token with permission to publish packages for this 
 
 ## Assumptions
 
-- The package coordinates are intentionally lowercase and GitHub Packages compatible: `com.512itconsulting.database:core:3.4.0`.
+- The package coordinates are intentionally lowercase and GitHub Packages compatible: `com.512itconsulting.database:core:3.4.1`.
 - The GitHub Packages owner/repository path is `512itconsulting/core`, matching the canonical GitHub owner and repository path.
 - The ZIP should preserve the repository's current layout instead of moving files into Maven's standard `src/main` tree.
 - The ZIP includes Maven packaging files themselves because it is currently a repository-content distribution.

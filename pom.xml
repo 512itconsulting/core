@@ -12,7 +12,7 @@
     <groupId>com.512itconsulting.database</groupId>
     <!-- Keep artifactId stable during the dbpm-core rebrand for dbpm compatibility. -->
     <artifactId>core</artifactId>
-    <version>3.4.0</version>
+    <version>3.4.1</version>
     <packaging>pom</packaging>
 
     <name>dbpm-core</name>
