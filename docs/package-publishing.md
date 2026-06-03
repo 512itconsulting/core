@@ -4,6 +4,10 @@ dbpm-core (Core) is packaged and published with dbpm. The repository does not
 use Maven build files; dbpm builds the ZIP artifact, generates Maven repository
 metadata, and publishes both the ZIP and generated POM to GitHub Packages.
 
+See [Core vs dbpm](core-vs-dbpm.md) for the boundary between Core's in-database
+registry responsibilities and dbpm's package, artifact, and orchestration
+responsibilities.
+
 `dbpm-core` is the external project identity. The package coordinates remain
 `com.512itconsulting.database:core` for compatibility with existing dbpm
 artifact resolution and deployed Core instances. The in-database application

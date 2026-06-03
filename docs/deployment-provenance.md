@@ -46,6 +46,10 @@ Responsibilities are separated as follows:
 | Orchestration layer | Coordinates deployment order and injects deployment provenance |
 | Git | Provides immutable source provenance |
 
+See [Core vs dbpm](core-vs-dbpm.md) for the canonical boundary between Core's
+in-database registry responsibilities and dbpm's external orchestration,
+artifact, and package responsibilities.
+
 This separation allows:
 - independent versioning
 - reproducible deployments

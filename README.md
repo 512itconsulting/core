@@ -56,6 +56,14 @@ Compatibility surfaces intentionally remain stable:
 
 ## Core Concepts
 
+### Core and dbpm Responsibilities
+
+Core is the in-database registry and lifecycle substrate. dbpm is the external
+package, artifact, and orchestration tool.
+
+See [Core vs dbpm](docs/core-vs-dbpm.md) for the responsibility boundary between
+installed database state and external deployment orchestration.
+
 ### Semantic Versioned Database Applications
 
 Applications are deployed using semantic version metadata:
