@@ -1,9 +1,9 @@
 package:
   # Keep the package name stable for existing dbpm artifact consumption.
   name: core
-  version: "3.4.1"
+  version: "3.4.2"
   description: dbpm-core Oracle deployment metadata and lifecycle substrate
-  vendor: rsantmyer
+  vendor: 512itconsulting
   license: Apache-2.0
 
 database:

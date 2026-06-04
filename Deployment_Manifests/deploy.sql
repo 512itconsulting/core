@@ -2,7 +2,7 @@ SET DEFINE ON
 DEFINE APPLICATION_NAME = 'CORE'
 DEFINE DEPLOY_VERSION_MAJOR = '3'
 DEFINE DEPLOY_VERSION_MINOR = '4'
-DEFINE DEPLOY_VERSION_PATCH = '1'
+DEFINE DEPLOY_VERSION_PATCH = '2'
 DEFINE DEPLOY_COMMIT_HASH = '&&1'
 
 COLUMN CURRENT_SCHEMA       new_value CURRENT_SCHEMA      
@@ -119,6 +119,8 @@ BEGIN
       --, ip_redeploy_curr_okay => TRUE
       , ip_notes => 
 Q'{
+3.4.2
+* Publish Core under the 512itconsulting dbpm registry publisher
 3.4.1
 * Prevent lower-version deployments
 * Add serialized version component bounds checks

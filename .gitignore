@@ -1,6 +1,10 @@
 # Maven build output
 target/
 
+# dbpm local state
+.dbpm-cache/
+.dbpm-logs/
+
 # IDE/editor project files
 .idea/
 .vscode/
