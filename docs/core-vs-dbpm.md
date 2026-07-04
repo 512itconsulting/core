@@ -49,6 +49,10 @@ treat the database as protected and block development-only or destructive
 behavior. `N` means development workflows are allowed, subject to explicit
 destructive-action flags.
 
+Core's `pkg_app_dict.set_deployment_metadata_p` initializes `DEPLOY_LOCKED` but
+does not change an existing lock value. Later lock changes should be deliberate
+operational dictionary updates.
+
 dbpm should read `DEPLOY_LOCKED` from Core rather than deriving safety policy
 from `DEPLOY_ENVIRONMENT` or from an external environment name.
 

@@ -80,10 +80,20 @@ BEGIN
    expect_no_arg_failure;
    expect_failure('Missing DEPLOY_LOCKED', pkg_application.c_delete_system_confirm);
 
-   pkg_app_dict.set_deployment_metadata_p(ip_deploy_locked => 'N');
+   pkg_app_dict.merge_val_p(
+      c_app,
+      'DEPLOY_LOCKED',
+      'N',
+      'Test value for delete_system_p guard checks.'
+   );
    expect_failure('Bad confirmation', 'DELETE STUFF');
 
-   pkg_app_dict.set_deployment_metadata_p(ip_deploy_locked => 'Y');
+   pkg_app_dict.merge_val_p(
+      c_app,
+      'DEPLOY_LOCKED',
+      'Y',
+      'Test value for delete_system_p guard checks.'
+   );
    expect_failure('Locked database', pkg_application.c_delete_system_confirm);
 
    restore_value;

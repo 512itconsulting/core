@@ -102,6 +102,9 @@ BEGIN
    save_value('DEPLOY_ENVIRONMENT', l_env_exists, l_env_value, l_env_note);
    l_saved := TRUE;
 
+   pkg_app_dict.delete_val_p(c_app, 'DEPLOY_LOCKED');
+   pkg_app_dict.delete_val_p(c_app, 'DEPLOY_ENVIRONMENT');
+
    pkg_app_dict.set_deployment_metadata_p(
       ip_deploy_locked      => 'Y',
       ip_deploy_environment => 'DEV'
@@ -109,12 +112,21 @@ BEGIN
    expect_value('DEPLOY_LOCKED', 'Y');
    expect_value('DEPLOY_ENVIRONMENT', 'DEV');
 
+   expect_failure('Existing DEPLOY_LOCKED', 'N');
+   expect_value('DEPLOY_LOCKED', 'Y');
+   expect_value('DEPLOY_ENVIRONMENT', 'DEV');
+
+   pkg_app_dict.delete_val_p(c_app, 'DEPLOY_LOCKED');
+   pkg_app_dict.delete_val_p(c_app, 'DEPLOY_ENVIRONMENT');
+
    pkg_app_dict.set_deployment_metadata_p(
       ip_deploy_locked      => 'n',
       ip_deploy_environment => 'PROD'
    );
    expect_value('DEPLOY_LOCKED', 'N');
    expect_value('DEPLOY_ENVIRONMENT', 'PROD');
+
+   pkg_app_dict.delete_val_p(c_app, 'DEPLOY_LOCKED');
 
    expect_failure('Missing DEPLOY_LOCKED', NULL);
    expect_failure('Invalid DEPLOY_LOCKED', 'MAYBE');

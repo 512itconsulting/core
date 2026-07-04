@@ -104,6 +104,11 @@ behavior.
 Do not infer `DEPLOY_LOCKED` from `DEPLOY_ENVIRONMENT`; store both values
 explicitly.
 
+`pkg_app_dict.set_deployment_metadata_p` is an initial configuration helper for
+`DEPLOY_LOCKED`. Once `DEPLOY_LOCKED` exists, the procedure will not change it.
+Changing the lock value later should be treated as a deliberate operational
+dictionary update.
+
 For scripted installs, define both values before running the Core install
 manifest:
 

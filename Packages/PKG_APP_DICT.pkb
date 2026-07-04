@@ -104,6 +104,9 @@ BEGIN
    assert(l_deploy_locked IN ('Y', 'N'),
           'DEPLOY_LOCKED must be Y or N.');
 
+   assert(NOT pkg_app_dict.exists_f('CORE', 'DEPLOY_LOCKED'),
+          'DEPLOY_LOCKED is already configured and cannot be changed by set_deployment_metadata_p.');
+
    merge_val_p(
       'CORE',
       'DEPLOY_LOCKED',
