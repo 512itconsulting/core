@@ -84,6 +84,49 @@ associated with the deployed source state.
 This allows environments running the same semantic version to still be
 distinguished during active development, hotfixes, or unreleased builds.
 
+### Deployment Environment and Safety Policy
+
+Core stores deployment configuration in `APP_DICTIONARY` for the in-database
+`CORE` application.
+
+`DEPLOY_ENVIRONMENT` is a human-readable label for the database, such as
+`DEV`, `QLAB01`, `PLAB`, or `PROD`. It answers "Where am I?"
+
+`DEPLOY_LOCKED` is the deployment safety policy flag. It answers "Should
+dangerous deployment behavior be blocked?" The value is required during Core
+install/bootstrap, must be `Y` or `N`, and is stored normalized to uppercase.
+
+Use `DEPLOY_LOCKED=N` for development-like databases where local development
+workflows are allowed. Use `DEPLOY_LOCKED=Y` for production or production-like
+databases where deployment tooling should block development-only or destructive
+behavior.
+
+Do not infer `DEPLOY_LOCKED` from `DEPLOY_ENVIRONMENT`; store both values
+explicitly.
+
+For scripted installs, define both values before running the Core install
+manifest:
+
+```sql
+DEFINE DEPLOY_ENVIRONMENT = DEV
+DEFINE DEPLOY_LOCKED = N
+
+@Deployment_Manifests/deploy.sql <core-commit-hash>
+```
+
+For manual installs that use `Deployment_Manifests/deploy_wrapper.sql`, first
+generate the local substitution-variable file:
+
+```sh
+Deployment_Manifests/generate_env.sh
+```
+
+This writes `Deployment_Manifests/env.sql` with the current repository commit
+hash for Core. If the script is used in a dbpm-style repository containing
+multiple package folders, it writes one substitution variable per package-like
+folder using the latest commit that touched that folder. The generated file is
+local install state and should not be committed.
+
 ### Dependency-Aware Applications
 
 Applications can declare dependencies on:

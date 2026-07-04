@@ -1,8 +1,8 @@
 SET DEFINE ON
 DEFINE APPLICATION_NAME = 'CORE'
 DEFINE DEPLOY_VERSION_MAJOR = '3'
-DEFINE DEPLOY_VERSION_MINOR = '4'
-DEFINE DEPLOY_VERSION_PATCH = '2'
+DEFINE DEPLOY_VERSION_MINOR = '5'
+DEFINE DEPLOY_VERSION_PATCH = '0'
 DEFINE DEPLOY_COMMIT_HASH = '&&1'
 
 COLUMN CURRENT_SCHEMA       new_value CURRENT_SCHEMA      
@@ -119,6 +119,9 @@ BEGIN
       --, ip_redeploy_curr_okay => TRUE
       , ip_notes => 
 Q'{
+3.5.0
+* Add DEPLOY_LOCKED deployment safety metadata
+* Add manual deployment env generation for non-dbpm installs
 3.4.2
 * Publish Core under the 512itconsulting dbpm registry publisher
 3.4.1
@@ -203,6 +206,7 @@ EXEC pkg_application.add_object_p(ip_application_name => '&&APPLICATION_NAME', i
 --
 EXEC pkg_application.validate_objects_p(ip_application_name => '&&APPLICATION_NAME');
 EXEC pkg_application.validate_sys_privs_p(ip_application_name => '&&APPLICATION_NAME');
+EXEC pkg_app_dict.set_deployment_metadata_p(ip_deploy_locked => q'[&&DEPLOY_LOCKED]', ip_deploy_environment => q'[&&DEPLOY_ENVIRONMENT]');
 --
 EXEC pkg_application.set_deployment_complete_p(ip_application_name => '&&APPLICATION_NAME');
 

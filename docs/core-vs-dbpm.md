@@ -33,6 +33,25 @@ or replacing application objects.
 Core's own initial deployment is a bootstrap exception because
 `pkg_application` does not exist yet.
 
+## Deployment Environment and Lock Policy
+
+Core owns the in-database deployment metadata that describes the current
+database and its safety posture.
+
+`DEPLOY_ENVIRONMENT` in `APP_DICTIONARY` is a human-readable label, such as
+`DEV`, `QLAB01`, `PLAB`, or `PROD`. It should be used only as a reminder of
+where the schema is installed.
+
+`DEPLOY_LOCKED` in `APP_DICTIONARY` is the authoritative deployment safety
+policy input. It is required during Core install/bootstrap, must be `Y` or `N`,
+and is stored as uppercase. `Y` means dbpm and other deployment tooling should
+treat the database as protected and block development-only or destructive
+behavior. `N` means development workflows are allowed, subject to explicit
+destructive-action flags.
+
+dbpm should read `DEPLOY_LOCKED` from Core rather than deriving safety policy
+from `DEPLOY_ENVIRONMENT` or from an external environment name.
+
 ## dbpm Responsibilities
 
 dbpm answers questions about packages, artifacts, and deployment intent:

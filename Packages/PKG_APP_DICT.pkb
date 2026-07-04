@@ -90,5 +90,37 @@ BEGIN
 END delete_val_p;
 
 
+
+PROCEDURE set_deployment_metadata_p
+   ( ip_deploy_locked      IN app_dictionary.value%TYPE
+   , ip_deploy_environment IN app_dictionary.value%TYPE DEFAULT NULL
+   )
+IS
+   l_deploy_locked app_dictionary.value%TYPE := UPPER(TRIM(ip_deploy_locked));
+BEGIN
+   assert(l_deploy_locked IS NOT NULL,
+          'DEPLOY_LOCKED is required. Supply Y for protected databases or N for development databases.');
+
+   assert(l_deploy_locked IN ('Y', 'N'),
+          'DEPLOY_LOCKED must be Y or N.');
+
+   merge_val_p(
+      'CORE',
+      'DEPLOY_LOCKED',
+      l_deploy_locked,
+      'Y blocks dangerous deployment behavior; N allows development deployment workflows.'
+   );
+
+   IF ip_deploy_environment IS NOT NULL THEN
+      merge_val_p(
+         'CORE',
+         'DEPLOY_ENVIRONMENT',
+         ip_deploy_environment,
+         'Human-readable deployment environment label (i.e. DEV, QLAB01, PLAB, PROD).'
+      );
+   END IF;
+END set_deployment_metadata_p;
+
+
 END PKG_APP_DICT;
 /

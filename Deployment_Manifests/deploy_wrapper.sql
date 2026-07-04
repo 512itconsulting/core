@@ -7,14 +7,15 @@ SELECT sys_context('USERENV','CURRENT_SCHEMA') AS CURRENT_SCHEMA FROM DUAL;
 WHENEVER SQLERROR EXIT FAILURE
 WHENEVER OSERROR EXIT FAILURE
 
---Set the DEFINE variable for the commit hash. Doing it this way means the commit will be one behind the one in in the repo
-DEFINE CORE = 8e8283d198feb2965bd3c0f42401b6d6c7cc464a
+-- Manual install wrapper only. dbpm injects these values directly and does not
+-- call this wrapper. Run ./generate_env.sh before this script.
+@@./env.sql
 
 ALTER SESSION DISABLE PARALLEL DML;
-@./deploy.sql &CORE
+PROMPT Configure Core deployment metadata.
+ACCEPT DEPLOY_ENVIRONMENT CHAR PROMPT 'Deployment environment label (i.e. DEV, QLAB01, PLAB, PROD): '
+ACCEPT DEPLOY_LOCKED      CHAR PROMPT 'Deployment locked? Y blocks dangerous deployment behavior; N allows development workflows (Y/N): '
 
-PAUSE Deploy complete. Press RETURN to add a dictionary entry for the environment (Optional)
-ACCEPT DEPLOY_ENV    CHAR PROMPT 'Deployment environment (i.e. DEV, TEST, PROD): '
-EXEC PKG_APP_DICT.ADD_VAL_P('CORE','DEPLOY_ENVIRONMENT','&&DEPLOY_ENV', 'The deployment environment (i.e. DEV, TEST, PROD)');
+@@./deploy.sql &CORE
 
 SELECT * FROM APP_DICTIONARY;

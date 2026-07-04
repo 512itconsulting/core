@@ -5,6 +5,9 @@ target/
 .dbpm-cache/
 .dbpm-logs/
 
+# Generated SQL*Plus substitution variables for manual installs
+Deployment_Manifests/env.sql
+
 # IDE/editor project files
 .idea/
 .vscode/

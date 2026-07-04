@@ -30,7 +30,7 @@ The publish settings live in `dbpm.yaml`:
 
 ```yaml
 package:
-  version: "3.4.2"
+  version: "3.5.0"
   description: dbpm-core Oracle deployment metadata and lifecycle substrate
   vendor: 512itconsulting
 
@@ -66,9 +66,9 @@ Example contents:
 ```properties
 artifact.groupId=com.512itconsulting.database
 artifact.artifactId=core
-artifact.version=3.4.2
+artifact.version=3.5.0
 artifact.extension=zip
-build.version=3.4.2
+build.version=3.5.0
 build.time=2026-06-02T16:49:02Z
 build.source=dbpm
 git.commit.id=b6cfc3d752d4c812578b04d15697d0d3f632f5d4
@@ -86,7 +86,7 @@ state.
 - dbpm publish support must include artifact metadata generation, first added
   on dbpm main in commit `3b86504`.
 - The package coordinates are intentionally lowercase and GitHub Packages
-  compatible: `com.512itconsulting.database:core:3.4.2`.
+  compatible: `com.512itconsulting.database:core:3.5.0`.
 - The dbpm registry publisher is `512itconsulting`, matching `package.vendor`.
 - The GitHub Packages owner/repository path is `512itconsulting/core`, matching
   the canonical GitHub owner and repository path.
