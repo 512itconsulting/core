@@ -122,6 +122,7 @@ Q'{
 3.5.0
 * Add DEPLOY_LOCKED deployment safety metadata
 * Add manual deployment env generation for non-dbpm installs
+* Gate pkg_application.delete_system_p behind confirmation and DEPLOY_LOCKED
 3.4.2
 * Publish Core under the 512itconsulting dbpm registry publisher
 3.4.1

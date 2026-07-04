@@ -221,6 +221,10 @@ a self-contained uninstall script for the `CORE` deployment.
 > `uninstall.core.sql` is destructive and intended only for safe,
 > non-production environments.
 
+`pkg_application.delete_system_p` is also destructive. It is intended only for
+explicit development reset scenarios, requires exact confirmation text, and is
+allowed only when `DEPLOY_LOCKED=N`.
+
 ---
 
 ## Cross-Application Metadata Ownership

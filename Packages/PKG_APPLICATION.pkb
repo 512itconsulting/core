@@ -1661,10 +1661,22 @@ END delete_application_p;
 
 
 
-PROCEDURE delete_system_p
+PROCEDURE delete_system_p( ip_confirm IN VARCHAR2 )
 IS
    l_notfound BOOLEAN := FALSE;
+   l_deploy_locked app_dictionary.value%TYPE;
 BEGIN
+   assert(ip_confirm = c_delete_system_confirm,
+          'delete_system_p requires confirmation text: '||c_delete_system_confirm);
+
+   assert(pkg_app_dict.exists_f('CORE', 'DEPLOY_LOCKED'),
+          'DEPLOY_LOCKED must be configured before delete_system_p can run.');
+
+   l_deploy_locked := pkg_app_dict.get_val_f('CORE', 'DEPLOY_LOCKED');
+
+   assert(l_deploy_locked = 'N',
+          'delete_system_p requires DEPLOY_LOCKED=N; found: '||l_deploy_locked);
+
    LOOP
       EXIT WHEN l_notfound;
       

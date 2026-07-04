@@ -34,18 +34,23 @@ Q'{
 3.5.0
 * Add DEPLOY_LOCKED deployment safety metadata
 * Add manual deployment env generation for non-dbpm installs
+* Gate pkg_application.delete_system_p behind confirmation and DEPLOY_LOCKED
 }'
       );
 END;
 /
 
+EXEC pkg_application.add_object_p(ip_application_name => '&&APPLICATION_NAME', ip_object_name => 'PKG_APPLICATION', ip_object_type => pkg_application.c_object_type_package);
+EXEC pkg_application.add_object_p(ip_application_name => '&&APPLICATION_NAME', ip_object_name => 'PKG_APPLICATION', ip_object_type => pkg_application.c_object_type_package_body);
 EXEC pkg_application.add_object_p(ip_application_name => '&&APPLICATION_NAME', ip_object_name => 'PKG_APP_DICT', ip_object_type => pkg_application.c_object_type_package);
 EXEC pkg_application.add_object_p(ip_application_name => '&&APPLICATION_NAME', ip_object_name => 'PKG_APP_DICT', ip_object_type => pkg_application.c_object_type_package_body);
 
 PROMPT Creating Package Specifications
+@@../../../Packages/PKG_APPLICATION.pks
 @@../../../Packages/PKG_APP_DICT.pks
 
 PROMPT Creating Package Bodies
+@@../../../Packages/PKG_APPLICATION.pkb
 @@../../../Packages/PKG_APP_DICT.pkb
 
 PROMPT Recompiling invalid objects

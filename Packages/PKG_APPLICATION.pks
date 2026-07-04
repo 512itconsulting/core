@@ -118,6 +118,8 @@ AS
    c_deploy_status_complete   CONSTANT APPLICATION.deploy_status%TYPE := 'C';
    c_deploy_status_fail       CONSTANT APPLICATION.deploy_status%TYPE := 'F';
    --
+   c_delete_system_confirm    CONSTANT VARCHAR2(100) := 'DELETE ALL NON-CORE APPLICATIONS';
+   --
    --APP_DEPENDENCY.is_valid
    c_valid_unknown            CONSTANT APP_DEPENDENCY.is_valid%TYPE   := 'U';
    c_valid_yes                CONSTANT APP_DEPENDENCY.is_valid%TYPE   := 'Y';
@@ -517,11 +519,13 @@ AS
    PROCEDURE delete_application_p( ip_application_name  IN application.application_name%TYPE
                                  , ip_fail_on_not_found IN VARCHAR2 DEFAULT 'Y' );
 /**
- * @description Deletes all application-registry data and drops all registered objects.
- * This is destructive and is intended for development reset scenarios, not routine
- * production deployments.
+ * @description Deletes all non-CORE application-registry data and drops all registered
+ * objects. This is destructive and is intended only for explicit development reset
+ * scenarios. Requires exact confirmation text and DEPLOY_LOCKED=N.
+ * @param ip_confirm Must equal c_delete_system_confirm. Defaults to NULL so
+ * legacy no-argument calls fail safely at runtime instead of failing to compile.
  */
-   PROCEDURE delete_system_p;
+   PROCEDURE delete_system_p( ip_confirm IN VARCHAR2 DEFAULT NULL );
 /**
  * @description Physically drops a database object by type and name. The registry row,
  * if any, is not removed by this procedure.
