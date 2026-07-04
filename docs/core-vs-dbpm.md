@@ -102,7 +102,7 @@ In short:
 - dbpm should treat `delete_application_p` before an initial deployment as an
   explicit destructive reinstall path, not as the default install path.
 - `pkg_application.delete_system_p` is a destructive development reset API and
-  should require exact confirmation plus `DEPLOY_LOCKED` policy evaluation.
+  should require exact confirmation and `DEPLOY_LOCKED=N`.
 - Destructive reinstall behavior should be gated for development or pre-prod
   environments and avoided for established environments unless clearly
   requested.

@@ -173,6 +173,10 @@ DEFINE YAXFORM = 2f77c6f7e8f54138f0e4eb1d5d5fbd9dc7b48c6a
 
 The full 40-character git hash is recommended.
 
+For manual Core installs, `Deployment_Manifests/generate_env.sh` generates the
+local `Deployment_Manifests/env.sql` file consumed by
+`Deployment_Manifests/deploy_wrapper.sql`.
+
 ---
 
 ## Top-Level Deployment Wrapper
