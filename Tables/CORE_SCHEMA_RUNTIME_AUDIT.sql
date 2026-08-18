@@ -1,0 +1,33 @@
+CREATE SEQUENCE CORE_SCHEMA_RUNTIME_AUDIT_SEQ START WITH 1 INCREMENT BY 1 NOCACHE;
+
+CREATE TABLE CORE_SCHEMA_RUNTIME_AUDIT
+(
+  AUDIT_ID             INTEGER      NOT NULL
+, RUNTIME_ID           VARCHAR2(36) NOT NULL
+, EVENT_TYPE           VARCHAR2(10) NOT NULL
+, OPERATION_ID         VARCHAR2(36) NOT NULL
+, ATTEMPT_NUMBER       INTEGER      NOT NULL
+, ACTOR                VARCHAR2(128)
+, OLD_PREFIX_IDENTITY  VARCHAR2(1000)
+, NEW_PREFIX_IDENTITY  VARCHAR2(1000)
+, OLD_BINDING_TOKEN    VARCHAR2(32)
+, NEW_BINDING_TOKEN    VARCHAR2(32)
+, CHANGED_AT           TIMESTAMP WITH TIME ZONE DEFAULT SYSTIMESTAMP NOT NULL
+, CONSTRAINT CORE_SCHEMA_RUNTIME_AUDIT_PK  PRIMARY KEY (AUDIT_ID)
+, CONSTRAINT CORE_SCHEMA_RUNTIME_AUDIT_CK1 CHECK (EVENT_TYPE IN ('BIND','REBIND') )
+)
+;
+
+COMMENT ON TABLE  CORE_SCHEMA_RUNTIME_AUDIT                       IS 'Append-only audit trail for bind_schema_runtime_p creating or replacing the schema''s runtime binding. Never updated or deleted. Idempotent verify-only calls (same prefix, no change) are not recorded here.';
+--
+COMMENT ON COLUMN CORE_SCHEMA_RUNTIME_AUDIT.AUDIT_ID              IS 'PK. Surrogate, from CORE_SCHEMA_RUNTIME_AUDIT_SEQ.';
+COMMENT ON COLUMN CORE_SCHEMA_RUNTIME_AUDIT.RUNTIME_ID             IS 'The runtime_id created (BIND) or newly issued (REBIND).';
+COMMENT ON COLUMN CORE_SCHEMA_RUNTIME_AUDIT.EVENT_TYPE             IS 'BIND for the first binding, REBIND for an authorized replacement of a different prefix.';
+COMMENT ON COLUMN CORE_SCHEMA_RUNTIME_AUDIT.OPERATION_ID           IS 'The fenced operation that authorized this bind/rebind.';
+COMMENT ON COLUMN CORE_SCHEMA_RUNTIME_AUDIT.ATTEMPT_NUMBER         IS 'The operation attempt that authorized this bind/rebind.';
+COMMENT ON COLUMN CORE_SCHEMA_RUNTIME_AUDIT.ACTOR                  IS 'Caller-supplied actor identity for this bind/rebind.';
+COMMENT ON COLUMN CORE_SCHEMA_RUNTIME_AUDIT.OLD_PREFIX_IDENTITY    IS 'Previous prefix_identity; NULL for BIND.';
+COMMENT ON COLUMN CORE_SCHEMA_RUNTIME_AUDIT.NEW_PREFIX_IDENTITY    IS 'New prefix_identity.';
+COMMENT ON COLUMN CORE_SCHEMA_RUNTIME_AUDIT.OLD_BINDING_TOKEN      IS 'Previous binding_token; NULL for BIND. Not a secret, same posture as CORE_SCHEMA_RUNTIME.BINDING_TOKEN.';
+COMMENT ON COLUMN CORE_SCHEMA_RUNTIME_AUDIT.NEW_BINDING_TOKEN      IS 'Newly issued binding_token.';
+COMMENT ON COLUMN CORE_SCHEMA_RUNTIME_AUDIT.CHANGED_AT             IS 'Timestamp of the bind/rebind.';

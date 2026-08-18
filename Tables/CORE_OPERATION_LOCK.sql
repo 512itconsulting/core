@@ -1,0 +1,9 @@
+CREATE TABLE CORE_OPERATION_LOCK
+(
+  LOCK_ID VARCHAR2(1) NOT NULL
+, CONSTRAINT CORE_OPERATION_LOCK_PK PRIMARY KEY (LOCK_ID)
+)
+;
+
+COMMENT ON TABLE  CORE_OPERATION_LOCK        IS 'Single-row serialization gate for PKG_CORE_OPERATION.begin_and_acquire_operation_p. Seeded with exactly one row.';
+COMMENT ON COLUMN CORE_OPERATION_LOCK.LOCK_ID IS 'PK. Constant value ''X''.';

@@ -1,7 +1,7 @@
 SET DEFINE ON
 DEFINE APPLICATION_NAME = 'CORE'
 DEFINE DEPLOY_VERSION_MAJOR = '3'
-DEFINE DEPLOY_VERSION_MINOR = '5'
+DEFINE DEPLOY_VERSION_MINOR = '6'
 DEFINE DEPLOY_VERSION_PATCH = '0'
 DEFINE DEPLOY_COMMIT_HASH = '&&1'
 
@@ -74,6 +74,19 @@ Prompt Creating Tables
 @@../Tables/APP_DICTIONARY.sql
 @@../Tables/SYSTEM_LOG.sql
 @@../Tables/TRACE_LOG.sql
+@@../Tables/CORE_OPERATION.sql
+@@../Tables/CORE_OPERATION_SCOPE.sql
+@@../Tables/CORE_OPERATION_STEP.sql
+@@../Tables/CORE_OPERATION_LOCK.sql
+@@../Tables/CORE_SCHEMA_RUNTIME.sql
+@@../Tables/CORE_SCHEMA_RUNTIME_AUDIT.sql
+@@../Tables/CORE_RUNTIME_REVISION.sql
+@@../Tables/CORE_RUNTIME_CONTRIBUTION.sql
+@@../Tables/CORE_RUNTIME_REQUIREMENT.sql
+@@../Tables/CORE_RUNTIME_ACK.sql
+@@../Tables/CORE_CAPABILITY_AUDIT.sql
+
+INSERT INTO core_operation_lock (lock_id) VALUES ('X');
 
 --Procedures
 Prompt Creating Procedures
@@ -91,6 +104,8 @@ Prompt Creating Package Specifications
 @@../Packages/PKG_SYSLOG.pks
 @@../Packages/PKG_STRING.pks
 @@../Packages/PKG_TRACE.pks
+@@../Packages/PKG_CORE_OPERATION.pks
+@@../Packages/PKG_CORE_SCHEMA_RUNTIME.pks
 
 --Package Bodies
 Prompt Creating Package Bodies
@@ -99,6 +114,8 @@ Prompt Creating Package Bodies
 @@../Packages/PKG_SYSLOG.pkb
 @@../Packages/PKG_STRING.pkb
 @@../Packages/PKG_TRACE.pkb
+@@../Packages/PKG_CORE_OPERATION.pkb
+@@../Packages/PKG_CORE_SCHEMA_RUNTIME.pkb
 
 --Metadata
 Prompt Deploying Metadata
@@ -117,8 +134,35 @@ BEGIN
       , ip_patch_version      => &&DEPLOY_VERSION_PATCH
       , ip_deployment_type    => pkg_application.c_deploy_type_initial  --c_deploy_type_minor
       --, ip_redeploy_curr_okay => TRUE
-      , ip_notes => 
+      , ip_notes =>
 Q'{
+3.6.0
+* Add PKG_CORE_OPERATION: Core-owned fenced operation leases, replacing the
+  transitional APP_DICTIONARY-based DBPM_OP_* scheme with a supported API
+  (begin_and_acquire_operation_p, verify_fence_p, renew_operation_lease_p,
+  record_operation_step_p, release_operation_lease_p) and a scope hierarchy
+  (SCHEMA_LIFECYCLE, SCHEMA_RUNTIME, APPLICATION:<name>)
+* Add PKG_CORE_SCHEMA_RUNTIME and the schema-runtime registry (CORE_SCHEMA_RUNTIME,
+  CORE_RUNTIME_REVISION, CORE_RUNTIME_CONTRIBUTION, CORE_RUNTIME_REQUIREMENT,
+  CORE_RUNTIME_ACK): Core-owned authority over the one dbpm runtime
+  binding per schema, desired/active revision tracking, and fenced
+  activation/removal acknowledgement, per docs/core-schema-runtime-architecture.md
+* Gate begin_runtime_removal_p behind DEPLOY_LOCKED=N and
+  DBPM_ALLOW_ENVIRONMENT_RESET=Y, per Invariant 10
+* Persist and expose the actor on bind_schema_runtime_p (CORE_SCHEMA_RUNTIME.ACTOR)
+* Add record_database_complete_p and abandon_runtime_revision_p so
+  CORE_RUNTIME_REVISION.revision_status can reach DATABASE_COMPLETE and
+  FAILED; acknowledge_runtime_active_p now requires STAGED or
+  DATABASE_COMPLETE
+* Add record_runtime_validated_p and wire the VALIDATED acknowledgement type
+  for reconciliation evidence
+* Add PKG_APP_DICT.set_capability_p, apply_lifecycle_profile_p, and
+  get_lifecycle_capabilities_p: Core-owned administration for the five
+  DBPM_ALLOW_* keys and DEVELOPER/DISPOSABLE profile expansion, audited in
+  the new CORE_CAPABILITY_AUDIT table, per
+  docs/core-operation-api-followup.md's "Lifecycle capability profiles and
+  provisioning" section. DBPM_ALLOW_ENVIRONMENT_RESET is never implied by
+  either profile, and DBPM_ALLOW_GRAPH_RESET is granted only by DISPOSABLE
 3.5.0
 * Add DEPLOY_LOCKED deployment safety metadata
 * Add manual deployment env generation for non-dbpm installs
@@ -187,6 +231,20 @@ EXEC pkg_application.add_object_p(ip_application_name => '&&APPLICATION_NAME', i
 EXEC pkg_application.add_object_p(ip_application_name => '&&APPLICATION_NAME', ip_object_name => 'APP_DICTIONARY'      , ip_object_type => pkg_application.c_object_type_table);
 EXEC pkg_application.add_object_p(ip_application_name => '&&APPLICATION_NAME', ip_object_name => 'SYSTEM_LOG'        , ip_object_type => pkg_application.c_object_type_table);
 EXEC pkg_application.add_object_p(ip_application_name => '&&APPLICATION_NAME', ip_object_name => 'TRACE_LOG'      , ip_object_type => pkg_application.c_object_type_table);
+EXEC pkg_application.add_object_p(ip_application_name => '&&APPLICATION_NAME', ip_object_name => 'CORE_OPERATION'               , ip_object_type => pkg_application.c_object_type_table);
+EXEC pkg_application.add_object_p(ip_application_name => '&&APPLICATION_NAME', ip_object_name => 'CORE_OPERATION_SCOPE'         , ip_object_type => pkg_application.c_object_type_table);
+EXEC pkg_application.add_object_p(ip_application_name => '&&APPLICATION_NAME', ip_object_name => 'CORE_OPERATION_STEP'          , ip_object_type => pkg_application.c_object_type_table);
+EXEC pkg_application.add_object_p(ip_application_name => '&&APPLICATION_NAME', ip_object_name => 'CORE_OPERATION_LOCK' , ip_object_type => pkg_application.c_object_type_table);
+EXEC pkg_application.add_object_p(ip_application_name => '&&APPLICATION_NAME', ip_object_name => 'CORE_SCHEMA_RUNTIME'          , ip_object_type => pkg_application.c_object_type_table);
+EXEC pkg_application.add_object_p(ip_application_name => '&&APPLICATION_NAME', ip_object_name => 'CORE_SCHEMA_RUNTIME_AUDIT'    , ip_object_type => pkg_application.c_object_type_table);
+EXEC pkg_application.add_object_p(ip_application_name => '&&APPLICATION_NAME', ip_object_name => 'CORE_SCHEMA_RUNTIME_AUDIT_SEQ', ip_object_type => pkg_application.c_object_type_sequence);
+EXEC pkg_application.add_object_p(ip_application_name => '&&APPLICATION_NAME', ip_object_name => 'CORE_RUNTIME_REVISION'        , ip_object_type => pkg_application.c_object_type_table);
+EXEC pkg_application.add_object_p(ip_application_name => '&&APPLICATION_NAME', ip_object_name => 'CORE_RUNTIME_CONTRIBUTION'    , ip_object_type => pkg_application.c_object_type_table);
+EXEC pkg_application.add_object_p(ip_application_name => '&&APPLICATION_NAME', ip_object_name => 'CORE_RUNTIME_REQUIREMENT'     , ip_object_type => pkg_application.c_object_type_table);
+EXEC pkg_application.add_object_p(ip_application_name => '&&APPLICATION_NAME', ip_object_name => 'CORE_RUNTIME_ACK' , ip_object_type => pkg_application.c_object_type_table);
+EXEC pkg_application.add_object_p(ip_application_name => '&&APPLICATION_NAME', ip_object_name => 'CORE_RUNTIME_ACK_SEQ', ip_object_type => pkg_application.c_object_type_sequence);
+EXEC pkg_application.add_object_p(ip_application_name => '&&APPLICATION_NAME', ip_object_name => 'CORE_CAPABILITY_AUDIT'        , ip_object_type => pkg_application.c_object_type_table);
+EXEC pkg_application.add_object_p(ip_application_name => '&&APPLICATION_NAME', ip_object_name => 'CORE_CAPABILITY_AUDIT_SEQ'    , ip_object_type => pkg_application.c_object_type_sequence);
 --PROCEDURES
 EXEC pkg_application.add_object_p(ip_application_name => '&&APPLICATION_NAME', ip_object_name => 'ASSERT'           , ip_object_type => pkg_application.c_object_type_procedure);
 --TYPES
@@ -203,6 +261,10 @@ EXEC pkg_application.add_object_p(ip_application_name => '&&APPLICATION_NAME', i
 EXEC pkg_application.add_object_p(ip_application_name => '&&APPLICATION_NAME', ip_object_name => 'PKG_STRING'  , ip_object_type => pkg_application.c_object_type_package_body);
 EXEC pkg_application.add_object_p(ip_application_name => '&&APPLICATION_NAME', ip_object_name => 'PKG_TRACE'  , ip_object_type => pkg_application.c_object_type_package);
 EXEC pkg_application.add_object_p(ip_application_name => '&&APPLICATION_NAME', ip_object_name => 'PKG_TRACE'  , ip_object_type => pkg_application.c_object_type_package_body);
+EXEC pkg_application.add_object_p(ip_application_name => '&&APPLICATION_NAME', ip_object_name => 'PKG_CORE_OPERATION'  , ip_object_type => pkg_application.c_object_type_package);
+EXEC pkg_application.add_object_p(ip_application_name => '&&APPLICATION_NAME', ip_object_name => 'PKG_CORE_OPERATION'  , ip_object_type => pkg_application.c_object_type_package_body);
+EXEC pkg_application.add_object_p(ip_application_name => '&&APPLICATION_NAME', ip_object_name => 'PKG_CORE_SCHEMA_RUNTIME'  , ip_object_type => pkg_application.c_object_type_package);
+EXEC pkg_application.add_object_p(ip_application_name => '&&APPLICATION_NAME', ip_object_name => 'PKG_CORE_SCHEMA_RUNTIME'  , ip_object_type => pkg_application.c_object_type_package_body);
 --SYS PRIVS
 --EXEC pkg_application.add_sys_priv_p(ip_application_name => '&&APPLICATION_NAME', ip_privilege => 'SELECT ANY DICTIONARY');
 --

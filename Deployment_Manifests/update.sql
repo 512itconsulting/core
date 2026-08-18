@@ -4,4 +4,4 @@ SET SHOWMODE OFF
 WHENEVER SQLERROR EXIT FAILURE
 WHENEVER OSERROR EXIT FAILURE
 
-@@releases/3.5.0/update.sql &&1
+@@releases/3.6.0/update.sql &&1

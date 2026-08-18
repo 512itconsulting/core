@@ -1,0 +1,47 @@
+CREATE TABLE CORE_SCHEMA_RUNTIME
+(
+  RUNTIME_ID              VARCHAR2(36)   NOT NULL
+, BINDING_STATUS          VARCHAR2(10)   NOT NULL
+, PREFIX_IDENTITY         VARCHAR2(1000) NOT NULL
+, BINDING_TOKEN           VARCHAR2(32)   NOT NULL
+, DESIRED_REVISION        INTEGER        DEFAULT 0 NOT NULL
+, ACTIVE_REVISION         INTEGER
+, ACTIVE_GENERATION       VARCHAR2(100)
+, ACTIVE_RECEIPT_CHECKSUM VARCHAR2(128)
+, TRANSITION_STATUS       VARCHAR2(20)   DEFAULT 'IDLE' NOT NULL
+, REACHABILITY_STATUS     VARCHAR2(20)   DEFAULT 'UNKNOWN' NOT NULL
+, CURRENT_OPERATION_ID    VARCHAR2(36)
+, LAST_ACKNOWLEDGED_AT    TIMESTAMP WITH TIME ZONE
+, ACTOR                   VARCHAR2(128)
+, CREATED_AT              TIMESTAMP WITH TIME ZONE DEFAULT SYSTIMESTAMP NOT NULL
+, UPDATED_AT              TIMESTAMP WITH TIME ZONE DEFAULT SYSTIMESTAMP NOT NULL
+, CONSTRAINT CORE_SCHEMA_RUNTIME_PK  PRIMARY KEY (RUNTIME_ID)
+, CONSTRAINT CORE_SCHEMA_RUNTIME_CK1 CHECK (BINDING_STATUS IN ('BOUND','REMOVED') )
+, CONSTRAINT CORE_SCHEMA_RUNTIME_CK2 CHECK (TRANSITION_STATUS IN ('IDLE','PENDING','REMOVAL_PENDING','FAILED') )
+, CONSTRAINT CORE_SCHEMA_RUNTIME_CK3 CHECK (REACHABILITY_STATUS IN ('UNKNOWN','REACHABLE','UNREACHABLE') )
+, CONSTRAINT CORE_SCHEMA_RUNTIME_CK4 CHECK (DESIRED_REVISION >= 0)
+)
+;
+
+-- Enforces at most one BOUND row. Oracle unique indexes ignore NULL keys, so
+-- rows with BINDING_STATUS != 'BOUND' produce a NULL key and are unconstrained;
+-- only BOUND rows can collide.
+CREATE UNIQUE INDEX CORE_SCHEMA_RUNTIME_UK1
+    ON CORE_SCHEMA_RUNTIME (CASE WHEN BINDING_STATUS = 'BOUND' THEN 'BOUND' END)
+;
+
+COMMENT ON TABLE  CORE_SCHEMA_RUNTIME                        IS 'The schema''s runtime binding, current and historical (tombstoned). At most one row may be BINDING_STATUS=BOUND at a time; see CORE_SCHEMA_RUNTIME_UK1.';
+--
+COMMENT ON COLUMN CORE_SCHEMA_RUNTIME.RUNTIME_ID              IS 'PK. Core-generated immutable identifier. A rebind creates a new runtime_id rather than reusing one.';
+COMMENT ON COLUMN CORE_SCHEMA_RUNTIME.BINDING_STATUS          IS 'BOUND or REMOVED. A REMOVED row is an immutable tombstone, never reactivated.';
+COMMENT ON COLUMN CORE_SCHEMA_RUNTIME.PREFIX_IDENTITY         IS 'Canonical or opaque identity for DBPM_RUNTIME_PREFIX. Never treated as executable input.';
+COMMENT ON COLUMN CORE_SCHEMA_RUNTIME.BINDING_TOKEN           IS 'Random collision-avoidance value also written into the filesystem receipt. Not a secret.';
+COMMENT ON COLUMN CORE_SCHEMA_RUNTIME.DESIRED_REVISION        IS 'Monotonically increasing complete desired-state revision number.';
+COMMENT ON COLUMN CORE_SCHEMA_RUNTIME.ACTIVE_REVISION         IS 'Last revision successfully acknowledged as active. Unchanged while a newer desired revision is pending or failed.';
+COMMENT ON COLUMN CORE_SCHEMA_RUNTIME.ACTIVE_GENERATION       IS 'Last acknowledged filesystem generation.';
+COMMENT ON COLUMN CORE_SCHEMA_RUNTIME.ACTIVE_RECEIPT_CHECKSUM IS 'Receipt checksum acknowledged for ACTIVE_GENERATION.';
+COMMENT ON COLUMN CORE_SCHEMA_RUNTIME.TRANSITION_STATUS       IS 'IDLE, PENDING, REMOVAL_PENDING, or FAILED.';
+COMMENT ON COLUMN CORE_SCHEMA_RUNTIME.REACHABILITY_STATUS     IS 'Latest host observation: UNKNOWN, REACHABLE, or UNREACHABLE.';
+COMMENT ON COLUMN CORE_SCHEMA_RUNTIME.CURRENT_OPERATION_ID    IS 'Operation responsible for the current pending transition, if any.';
+COMMENT ON COLUMN CORE_SCHEMA_RUNTIME.LAST_ACKNOWLEDGED_AT    IS 'Timestamp of the latest valid host acknowledgement.';
+COMMENT ON COLUMN CORE_SCHEMA_RUNTIME.ACTOR                   IS 'Caller-supplied actor identity for the most recent bind_schema_runtime_p call (initial bind or rebind).';

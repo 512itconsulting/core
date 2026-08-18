@@ -20,6 +20,8 @@ Core provides Oracle database deployment metadata, dependency tracking, object r
 ## Key Packages
 
 - pkg_application
+- pkg_core_operation (fenced operation leases; see docs/core-operation-api-followup.md)
+- pkg_core_schema_runtime (schema-wide dbpm runtime registry; see docs/core-schema-runtime-architecture.md)
 
 ## Architecture
 

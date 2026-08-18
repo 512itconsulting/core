@@ -347,6 +347,12 @@ Currently developed and tested against Oracle Database 19c.
 
 ---
 
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for notable changes by release.
+
+---
+
 ## Status
 
 This project is under active development and APIs may evolve.
